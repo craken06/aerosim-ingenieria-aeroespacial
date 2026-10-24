@@ -1,5 +1,7 @@
 <div align="center">
 
+[☕ Invitame un café](https://link.mercadopago.com.ar/aerosim)
+
 # ✈️ AeroSim · Ingeniería Aeroespacial
 
 **Simulador interactivo para estudiar Conocimientos Aeronáuticos y Espaciales I**
