@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Simulador interactivo para repasar el 2do parcial de Conocimientos Aeronáuticos y Espaciales I.">
+<title>Simulador del 2do Parcial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Saira+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Conocimientos Aeronáuticos y Espaciales I · Repaso 2do parcial</p>
+      <h1>Simulador del 2do Parcial</h1>
+    </div>
+    <p>Cada pestaña es una unidad. Mové los controles y mirá qué pasa: arriba la simulación, al costado la explicación y lo que tenés que saber para el parcial.</p>
+  </div>
+</header>
+<nav class="units" aria-label="Unidades">
+  <div class="wrap" role="tablist">
+    <button role="tab" data-tab="hiper">Hipersustentadores</button>
+    <button role="tab" data-tab="spoil">Spoilers</button>
+    <button role="tab" data-tab="comandos">Comandos</button>
+    <button role="tab" data-tab="comp">Compensadores</button>
+    <button role="tab" data-tab="cola">Empenaje en V</button>
+    <button role="tab" data-tab="ala">Estructura del ala</button>
+    <button role="tab" data-tab="mat">Materiales</button>
+    <button role="tab" data-tab="tps">Protección térmica</button>
+    <button role="tab" data-tab="fab">Fabricación</button>
+    <button role="tab" data-tab="tsio">Tsiolkovsky</button>
+    <button role="tab" data-tab="etapas">Etapas y órbitas</button>
+  </div>
+</nav>
+<main class="wrap">
+
+<section class="panel" id="p-hiper" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Hipersustentadores</p>
+    <h2>Flaps: más sustentación para volar despacio</h2>
+    <p class="lede">Para despegar y aterrizar el avión necesita volar lento sin perder sustentación. Como L = ½·ρ·V²·S·CL, si baja V hay que subir CL. Eso hacen los flaps: cambian la forma del perfil para que dé más CL.</p>
+  </div>
+  <div class="subnav">
+    <button data-sub="perfil">Flaps y curva CL–α</button>
+    <button data-sub="polar">Polar y punto de transición</button>
+  </div>
+
+  <div class="sub" data-sub="perfil">
+    <div class="grid">
+      <div class="sim">
+        <canvas id="hp-flow"></canvas>
+        <div>
+          <div class="seglabel">Dispositivo de borde de ataque</div>
+          <div class="seg" data-name="hp-le">
+            <button data-v="none" aria-pressed="true">Ninguno</button>
+            <button data-v="droop">Sencillo</button>
+            <button data-v="krueger">Krueger</button>
+            <button data-v="betz">Betz</button>
+            <button data-v="slat">Slat</button>
+            <button data-v="slatauto">Slat automático</button>
+          </div>
+        </div>
+        <div>
+          <div class="seglabel">Flap de borde de fuga</div>
+          <div class="seg" data-name="hp-te">
+            <button data-v="none" aria-pressed="true">Ninguno</button>
+            <button data-v="plain">Sencillo</button>
+            <button data-v="slotted">Ranurado</button>
+            <button data-v="split">De intradós</button>
+            <button data-v="zap">Acharnelado</button>
+            <button data-v="fowler">Fowler</button>
+          </div>
+        </div>
+        <div class="controls">
+          <div class="ctl"><label for="hp-a">Ángulo de ataque α <output for="hp-a"></output></label><input type="range" id="hp-a" min="-4" max="24" step="0.5" value="6" data-unit="°" data-dec="1"></div>
+          <div class="ctl"><label for="hp-dte">Deflexión flap de fuga <output for="hp-dte"></output></label><input type="range" id="hp-dte" min="0" max="40" step="1" value="25" data-unit="°"></div>
+          <div class="ctl"><label for="hp-dle">Deflexión dispositivo de ataque <output for="hp-dle"></output></label><input type="range" id="hp-dle" min="0" max="25" step="1" value="20" data-unit="°"></div>
+        </div>
+        <div class="readouts">
+          <div class="ro"><span>CL actual</span><b id="hp-cl-v">—</b></div>
+          <div class="ro"><span>CL máx</span><b id="hp-clmax-v">—</b></div>
+          <div class="ro"><span>Ángulo de pérdida</span><b id="hp-as-v">—</b></div>
+          <div class="ro"><span>CD del perfil</span><b id="hp-cd-v">—</b></div>
+        </div>
+        <div class="status" id="hp-status"></div>
+        <canvas id="hp-cl"></canvas>
+        <div class="legend"><span><i style="background:var(--muted)"></i>Perfil limpio</span><span><i style="background:var(--accent)"></i>Con los dispositivos elegidos</span><span><i style="background:var(--warm)"></i>Punto de vuelo actual</span></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Qué estás viendo</h3>
+          <p>Arriba, un perfil NACA 2412 en el túnel. Las líneas son el aire y los puntos se mueven más rápido donde el aire va más rápido (extradós). Las flechas son la sustentación (L) y la resistencia (D). Abajo, la curva CL–α: cuánto CL da el perfil a cada ángulo de ataque.</p>
+          <p style="margin-top:8px">Pasá α más allá del ángulo de pérdida: el flujo se despega del extradós (zona turbulenta naranja) y el CL cae.</p>
+        </div>
+        <div class="card">
+          <h3>Flaps de borde de ataque</h3>
+          <p class="ppt">Su efecto principal es un <b>aumento considerable del CLmáx</b>. El <b>ángulo de sustentación nula</b> y la <b>pendiente</b> de la curva quedan prácticamente <b>iguales</b>.</p>
+          <ul style="margin-top:8px">
+            <li><b>Sencillo:</b> la nariz del perfil gira hacia abajo y se acomoda a la corriente que llega con mucho α.</li>
+            <li><b>Krueger:</b> una placa guardada en el intradós gira hacia adelante y abajo y queda delante del borde de ataque.</li>
+            <li><b>Betz:</b> la parte delantera baja y se separa dejando una ranura. Su geometría varía según la bibliografía; acá se la representa así.</li>
+          </ul>
+          <p class="note" style="margin-top:8px">Probalo: con flap de ataque la curva azul sigue a la gris y simplemente llega más alto y a más α antes de entrar en pérdida.</p>
+        </div>
+        <div class="card">
+          <h3>Slats</h3>
+          <p>El slat es un <b>perfil auxiliar pequeño</b> que forma la nariz del ala. Al extenderse avanza (sobre rieles) y baja, y entre él y el ala queda una <b>ranura</b> (slot).</p>
+          <ul style="margin-top:8px">
+            <li>Por la ranura pasa aire del intradós, a alta presión, hacia el extradós. Ese chorro le da energía a la capa límite y la mantiene <b>pegada al ala hasta ángulos de ataque mucho mayores</b>.</li>
+            <li>Además el slat le "saca" carga a la nariz del ala: el pico de succión se reparte entre el slat y el ala principal.</li>
+            <li>Resultado: <b>sube mucho el CLmáx y el ángulo de pérdida</b>; el α de sustentación nula casi no cambia y la pendiente apenas sube por el pequeño aumento de cuerda.</li>
+          </ul>
+          <h4>Tipos</h4>
+          <ul>
+            <li><b>Fijo (ranura fija):</b> siempre abierto. Simple, pero agrega resistencia en crucero.</li>
+            <li><b>Móvil comandado:</b> el piloto o el sistema lo extiende junto con los flaps (aviones de línea).</li>
+            <li><b>Automático (Handley Page):</b> no tiene comando. A ángulos de ataque altos la succión en la nariz del ala lo tira hacia adelante y se abre solo; a α bajos la presión lo cierra.</li>
+          </ul>
+          <p class="note" style="margin-top:8px">Probalo: elegí "Slat automático" y subí α de a poco. Se empieza a abrir cerca de los 5° y queda totalmente abierto a los 11°. Fijate cómo la curva azul se despega de la gris recién cuando el slat se abre.</p>
+        </div>
+        <div class="card">
+          <h3>Flaps de borde de fuga</h3>
+          <p class="ppt">Aumentan la <b>curvatura</b> del perfil: suben el CL <b>a cualquier α</b> y por lo tanto también el CLmáx. La resistencia aumenta mucho: la polar se corre a la derecha.</p>
+          <ul style="margin-top:8px">
+            <li><b>Sencillo:</b> la parte trasera gira sobre una bisagra.</li>
+            <li><b>Ranurado:</b> al bajar abre una ranura; el aire del intradós pasa al extradós del flap y lo mantiene pegado. Da más CL que el sencillo.</li>
+            <li><b>De intradós:</b> solo baja una placa de la cara inferior; el extradós no se mueve. Mucha resistencia.</li>
+            <li><b>Acharnelado:</b> placa articulada que además de bajar se corre hacia atrás.</li>
+            <li><b>Fowler:</b> sale hacia atrás sobre rieles y después baja. Aumenta curvatura <b>y superficie alar</b>: es el que más CL da.</li>
+          </ul>
+          <p class="note" style="margin-top:8px">Probalo: con flap de fuga la curva azul se corre hacia arriba y a la izquierda (el ángulo de sustentación nula se vuelve más negativo) y entra en pérdida a menor α.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul>
+            <li>Borde de ataque: sube CLmáx, no cambia α de sustentación nula ni pendiente.</li>
+            <li>Slat: perfil auxiliar en la nariz que abre una ranura; energiza la capa límite y retrasa la pérdida. Puede ser fijo, comandado o automático.</li>
+            <li>Borde de fuga: sube CL a todo α (más curvatura), sube CLmáx, sube mucho la resistencia, la polar se corre a la derecha.</li>
+            <li>Nombrá los tipos: ataque (sencillo, Krueger, Betz, slat) y fuga (sencillo, ranurado, de intradós, acharnelado, Fowler).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="polar" hidden>
+    <div class="grid">
+      <div class="sim">
+        <canvas id="hp-polar"></canvas>
+        <div class="controls">
+          <div class="ctl"><label for="hp-v">Velocidad del avión <output for="hp-v"></output></label><input type="range" id="hp-v" min="125" max="320" step="1" value="160" data-unit=" km/h"></div>
+          <div class="ctl" style="justify-content:flex-end"><button class="btn primary" id="hp-toggle" type="button">Meter flaps</button></div>
+        </div>
+        <div class="readouts">
+          <div class="ro"><span>CL necesario</span><b id="hp-clreq">—</b></div>
+          <div class="ro"><span>D con flaps fuera</span><b id="hp-dout">—</b></div>
+          <div class="ro"><span>D con flaps dentro</span><b id="hp-din">—</b></div>
+          <div class="ro"><span>Velocidad del punto M</span><b id="hp-vm">—</b></div>
+        </div>
+        <div class="status" id="hp-pstatus"></div>
+        <canvas id="hp-drag"></canvas>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Qué estás viendo</h3>
+          <p>Avión de 5.000 kg y 30 m² de ala, en vuelo nivelado (L = W). Arriba, las dos polares (CL vs CD): gris sin flaps, azul con flaps. Abajo, la resistencia total en newtons según la velocidad.</p>
+          <p style="margin-top:8px">A cada velocidad corresponde un único CL (el que hace L = W). Por eso al meter o sacar flaps el punto se mueve <b>horizontalmente</b> entre las polares: el CL no cambia, cambia el CD.</p>
+        </div>
+        <div class="card">
+          <h3>Punto de transición M</h3>
+          <p class="ppt">Con poca velocidad el CL es grande y estamos con flaps fuera: punto <b>A</b>. Si metemos flaps pasamos a <b>A'</b> de la polar sin flaps, con el mismo CL. En A' el CD es mayor: meter flaps <b>aumenta</b> la resistencia. En <b>B</b> y <b>B'</b> pasa lo contrario.</p>
+          <p style="margin-top:8px">Las polares se cruzan en <b>M</b>. Al piloto se le da M como una <b>velocidad</b>: por debajo conviene tener flaps fuera; por encima, mantenerlos fuera solo agrega resistencia.</p>
+          <p class="note" style="margin-top:8px">Probalo: bajá la velocidad por debajo de M y apretá "Meter flaps". La resistencia sube aunque el avión "quede más limpio".</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul>
+            <li>Al cambiar la configuración en vuelo nivelado el CL se mantiene (L = W), el punto se mueve en horizontal.</li>
+            <li>A y A': baja velocidad, meter flaps aumenta D. B y B': alta velocidad, sacar flaps aumenta D.</li>
+            <li>M es el cruce de las polares y se le da al piloto como velocidad de transición.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-spoil" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Hipersustentadores (dispositivos que la disminuyen)</p>
+    <h2>Spoilers: romper la sustentación a propósito</h2>
+    <p class="lede">A veces, en lugar de aumentar la sustentación, interesa disminuirla. Para eso están los spoilers: placas en el extradós que se levantan y despegan el flujo.</p>
+  </div>
+  <div class="grid">
+    <div class="sim">
+      <div class="seg" data-name="sp-mode">
+        <button data-v="roll" aria-pressed="true">Control lateral</button>
+        <button data-v="flight">Aerofreno en vuelo</button>
+        <button data-v="ground">Aerofreno en tierra</button>
+      </div>
+      <canvas id="sp-sec"></canvas>
+      <div class="readouts">
+        <div class="ro"><span>Deflexión spoiler</span><b id="sp-d-v">—</b></div>
+        <div class="ro"><span>Sustentación del tramo</span><b id="sp-l-v">—</b></div>
+        <div class="ro"><span>Resistencia del tramo</span><b id="sp-dr-v">—</b></div>
+      </div>
+      <div id="sp-roll-ui" class="padrow">
+        <div class="pad" id="sp-pad" aria-label="Palanca de mando: mové a izquierda o derecha"><span class="knob"></span><small style="left:6px;top:50%;transform:translateY(-50%)">IZQ</small><small style="right:6px;top:50%;transform:translateY(-50%)">DER</small></div>
+        <p class="note" style="flex:1;min-width:180px;margin:0">Arrastrá la palanca a un costado. Sube el spoiler del ala que tiene que bajar: esa ala pierde sustentación y el avión rola hacia ese lado. El otro spoiler queda abajo.</p>
+      </div>
+      <div id="sp-flight-ui" class="controls" hidden>
+        <div class="ctl"><label for="sp-d">Deflexión de los spoilers (ambas alas) <output for="sp-d"></output></label><input type="range" id="sp-d" min="0" max="60" step="1" value="30" data-unit="°"></div>
+        <div class="ctl" style="justify-content:flex-end"><button class="btn" id="sp-reset" type="button">Volver a 540 km/h</button></div>
+      </div>
+      <div id="sp-ground-ui" class="row" hidden>
+        <button class="btn primary" id="sp-land" type="button">Aterrizar los dos aviones</button>
+        <span class="note">Mismo avión de 60 t, toca a 252 km/h con frenos de rueda. Uno despliega los spoilers a 60°, el otro no.</span>
+      </div>
+      <canvas id="sp-view"></canvas>
+      <div class="status" id="sp-status"></div>
+    </div>
+    <div class="explain">
+      <div class="card">
+        <h3>Qué es</h3>
+        <p class="ppt">Una <b>placa que se deflecta formando un ángulo con el extradós</b> del ala. Suele tener varias posiciones; la de <b>mayor ángulo</b> se usa como <b>aerofreno en tierra</b>.</p>
+        <p style="margin-top:8px">Al levantarse, el aire que venía pegado al extradós choca con la placa y se despega. Detrás queda una zona turbulenta: <b>baja la sustentación y sube la resistencia</b>. Miralo en el corte de arriba.</p>
+      </div>
+      <div class="card">
+        <h3>Sus dos funciones</h3>
+        <ul>
+          <li><b>Control lateral:</b> se levanta el spoiler de una sola ala. Esa ala pierde sustentación y baja: el avión rola. Ayuda o reemplaza a los alerones.</li>
+          <li><b>Aerofrenos:</b> se levantan los de las dos alas a la vez. En vuelo, con posiciones intermedias, frenan al avión o lo hacen descender sin ganar velocidad. En tierra, a máximo ángulo, eliminan la sustentación: todo el peso cae sobre las ruedas y los frenos agarran mucho más.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Por qué frena tanto en tierra</h3>
+        <p>La fuerza de frenado de las ruedas es μ·(W − L). Si el ala todavía sustenta, las ruedas apenas apoyan. Con spoilers a 60° la L casi desaparece, la carga sobre las ruedas sube y además se suma la resistencia de las placas. Comparalo en el modo "Aerofreno en tierra".</p>
+      </div>
+      <div class="exam">
+        <h3>Para el parcial</h3>
+        <ul>
+          <li>Spoiler = disminuye la sustentación (lo opuesto a un hipersustentador).</li>
+          <li>Placa deflectada formando un ángulo con el extradós, varias posiciones.</li>
+          <li>Funciones: control lateral y aerofrenos; el mayor ángulo es para tierra.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-comandos" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Comandos de vuelo</p>
+    <h2>De la palanca a las superficies de mando</h2>
+    <p class="lede">El piloto mueve la palanca y los pedales; eso deflecta superficies móviles que cambian la sustentación local y hacen girar al avión alrededor de sus tres ejes. Compará el avión convencional con el ala delta sin cola, que usa elevones.</p>
+  </div>
+  <div class="grid">
+    <div class="sim">
+      <div class="seg" data-name="cm-type">
+        <button data-v="conv" aria-pressed="true">Avión convencional</button>
+        <button data-v="delta">Ala delta sin cola</button>
+      </div>
+      <canvas id="cm-top"></canvas>
+      <div class="legend"><span><i style="background:var(--accent)"></i>Borde de fuga abajo (más sustentación)</span><span><i style="background:var(--warm)"></i>Borde de fuga arriba (menos sustentación)</span></div>
+      <div class="padrow">
+        <div class="pad" id="cm-pad" aria-label="Palanca de mando"><span class="knob"></span><small style="left:50%;top:4px;transform:translateX(-50%)">EMPUJAR</small><small style="left:50%;bottom:4px;transform:translateX(-50%)">TIRAR</small><small style="left:4px;top:50%;transform:translateY(-50%)">IZQ</small><small style="right:4px;top:50%;transform:translateY(-50%)">DER</small></div>
+        <div style="flex:1;min-width:190px;display:flex;flex-direction:column;gap:8px">
+          <div class="ctl"><label for="cm-ped">Pedales <output for="cm-ped"></output></label><input type="range" id="cm-ped" min="-1" max="1" step="0.05" value="0" data-dec="2"></div>
+          <div class="row"><button class="btn" id="cm-center" type="button">Pedales al centro</button><button class="btn" id="cm-level" type="button">Nivelar el avión</button></div>
+          <p class="note" style="margin:0">Arrastrá la palanca (vuelve sola al centro). Con teclado: flechas.</p>
+        </div>
+      </div>
+      <canvas id="cm-att"></canvas>
+      <div class="status" id="cm-status"></div>
+    </div>
+    <div class="explain">
+      <div class="card">
+        <h3>Avión convencional</h3>
+        <ul>
+          <li><b>Palanca a un costado → alerones:</b> uno baja y el otro sube. El ala del alerón bajo gana sustentación y sube: <b>rolido</b> alrededor del eje longitudinal.</li>
+          <li><b>Palanca adelante o atrás → timón de profundidad:</b> empujar baja el timón, la cola sube y la nariz baja (<b>cabeceo</b>, eje transversal).</li>
+          <li><b>Pedales → timón de dirección:</b> <b>guiñada</b> alrededor del eje vertical.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Ala delta sin cola: elevones</h3>
+        <p>Sin estabilizador horizontal no hay timón de profundidad. Las superficies del borde de fuga del ala hacen de alerón y de timón a la vez: por eso se llaman <b>elevones</b>.</p>
+        <p class="ppt" style="margin-top:8px">Para <b>rolido</b>, los elevones de un semiplano giran en un sentido y los del otro en el opuesto, igual que los alerones clásicos. Para <b>cabeceo</b> (por ejemplo una picada), los elevones de <b>ambos semiplanos giran hacia abajo</b>, y viceversa.</p>
+        <p style="margin-top:8px">Si movés la palanca en diagonal, cada elevón suma las dos órdenes: uno se deflecta más que el otro. Fijate en los números de la vista en planta.</p>
+      </div>
+      <div class="exam">
+        <h3>Para el parcial</h3>
+        <ul>
+          <li>Elevón = alerón + timón de profundidad en la misma superficie (ala delta sin cola).</li>
+          <li>Rolido: deflexión opuesta en cada semiplano. Cabeceo: misma deflexión en los dos.</li>
+          <li>La palanca del piloto se mueve igual que en un avión convencional; la mezcla la hace el sistema de mando.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-comp" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Compensadores</p>
+    <h2>Compensación por cornadura</h2>
+    <p class="lede">Cuanto más rápido vuela el avión, más fuerza hace el aire sobre las superficies de mando y más le cuesta al piloto moverlas. Los compensadores aerodinámicos usan al propio aire para ayudar a mover la superficie.</p>
+  </div>
+  <div class="grid">
+    <div class="sim">
+      <div class="seg" data-name="comp-type">
+        <button data-v="none" aria-pressed="true">Sin compensar</button>
+        <button data-v="desp">Cornadura desprotegida</button>
+        <button data-v="prot">Cornadura protegida</button>
+      </div>
+      <canvas id="comp-top"></canvas>
+      <canvas id="comp-sec"></canvas>
+      <div class="controls">
+        <div class="ctl"><label for="comp-d">Deflexión del timón <output for="comp-d"></output></label><input type="range" id="comp-d" min="0" max="25" step="1" value="15" data-unit="°"></div>
+        <div class="ctl"><label for="comp-v">Velocidad <output for="comp-v"></output></label><input type="range" id="comp-v" min="100" max="350" step="5" value="250" data-unit=" km/h"></div>
+        <div class="ctl"><label for="comp-f">Tamaño del cuerno <output for="comp-f"></output></label><input type="range" id="comp-f" min="5" max="45" step="1" value="22" data-unit=" %"></div>
+      </div>
+      <canvas id="comp-force"></canvas>
+      <div class="status" id="comp-status"></div>
+    </div>
+    <div class="explain">
+      <div class="card">
+        <h3>Cómo funciona</h3>
+        <p>La superficie de mando gira sobre su línea de bisagra (punteada). Cuando la bajás, el aire empuja la parte de atrás de la bisagra y trata de devolverla a cero: ese es el <b>momento de bisagra</b> que el piloto siente en la palanca.</p>
+        <p style="margin-top:8px">La cornadura es un "cuerno" en el extremo de la superficie que queda <b>por delante</b> de la bisagra. Cuando el timón baja, el cuerno sube y el aire lo empuja en el sentido que <b>ayuda</b> al giro. Así se resta momento y la palanca se pone más liviana.</p>
+      </div>
+      <div class="card">
+        <h3>Desprotegida y protegida</h3>
+        <p class="ppt">Es la <b>más antigua y la más fácil de realizar</b>. El nombre viene de su <b>forma geométrica</b> (cuerno).</p>
+        <ul style="margin-top:8px">
+          <li><b>Desprotegida:</b> el cuerno llega hasta el borde de ataque y recibe la corriente de lleno. Compensa más, pero agrega resistencia y es más propensa a vibraciones.</li>
+          <li><b>Protegida:</b> por delante del cuerno sigue la superficie fija, que lo cubre. Compensa algo menos y de forma más suave.</li>
+        </ul>
+        <p class="note" style="margin-top:8px">Probalo: agrandá mucho el cuerno con la desprotegida. Si el cuerno hace más momento que la parte trasera, la superficie queda <b>sobrecompensada</b>: tiende a irse sola y la fuerza en la palanca se invierte. Por eso el cuerno se dimensiona con cuidado.</p>
+      </div>
+      <div class="exam">
+        <h3>Para el parcial</h3>
+        <ul>
+          <li>Compensación por cornadura: la más antigua y fácil; nombre por su forma.</li>
+          <li>Parte de la superficie móvil delante de la bisagra, en el extremo: reduce el momento de bisagra y la fuerza del piloto.</li>
+          <li>Dos tipos: desprotegida y protegida.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-cola" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Grupo de cola (empenaje)</p>
+    <h2>Cola en "V" o mariposa</h2>
+    <p class="lede">Dos superficies inclinadas reemplazan al estabilizador horizontal y a la deriva. Cada una tiene una parte móvil que hace de timón de profundidad y de timón de dirección a la vez. La palanca y los pedales del piloto son los mismos que en un avión convencional.</p>
+  </div>
+  <div class="grid">
+    <div class="sim">
+      <canvas id="cl-rear"></canvas>
+      <div class="padrow">
+        <div class="pad" id="cl-pad" aria-label="Palanca de mando: adelante y atrás"><span class="knob"></span><small style="left:50%;top:4px;transform:translateX(-50%)">EMPUJAR</small><small style="left:50%;bottom:4px;transform:translateX(-50%)">TIRAR</small></div>
+        <div style="flex:1;min-width:190px;display:flex;flex-direction:column;gap:8px">
+          <div class="ctl"><label for="cl-ped">Pedales (viraje) <output for="cl-ped"></output></label><input type="range" id="cl-ped" min="-1" max="1" step="0.05" value="0" data-dec="2"></div>
+          <div class="ctl"><label for="cl-gam">Ángulo de cada plano con la horizontal <output for="cl-gam"></output></label><input type="range" id="cl-gam" min="25" max="50" step="1" value="35" data-unit="°"></div>
+          <button class="btn" id="cl-center" type="button">Pedales al centro</button>
+        </div>
+      </div>
+      <canvas id="cl-motion"></canvas>
+      <div class="readouts">
+        <div class="ro"><span>Fuerza vertical</span><b id="cl-fv">—</b></div>
+        <div class="ro"><span>Fuerza lateral</span><b id="cl-fl">—</b></div>
+        <div class="ro"><span>Torsión en fuselaje (cola V)</span><b id="cl-tv">—</b></div>
+        <div class="ro"><span>Misma maniobra, cola clásica</span><b id="cl-tc">—</b></div>
+      </div>
+      <div class="status" id="cl-status"></div>
+    </div>
+    <div class="explain">
+      <div class="card">
+        <h3>Qué estás viendo</h3>
+        <p>La cola vista <b>desde atrás</b> del avión. Cada plano empuja en dirección perpendicular a sí mismo (flechas finas). La flecha gruesa es la resultante sobre la cola. Abajo ves cómo responde el avión.</p>
+      </div>
+      <div class="card">
+        <h3>Funcionamiento</h3>
+        <ul class="ppt">
+          <li><b>Palanca adelante:</b> los dos planos móviles giran <b>hacia abajo</b>. La resultante <b>levanta la cola</b> (la nariz baja).</li>
+          <li><b>Palanca atrás:</b> los dos suben, <b>baja la cola</b> y el avión asciende.</li>
+          <li><b>Viraje:</b> los planos actúan como alerones, <b>sustituyendo al timón de dirección</b>. Uno sube y el otro baja: las componentes verticales se cancelan y queda una fuerza <b>lateral</b>.</li>
+          <li>Este tipo de empenaje <b>aumenta considerablemente los esfuerzos de torsión sobre el fuselaje</b>.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Por qué tuerce tanto el fuselaje</h3>
+        <p>En el viraje las dos fuerzas son de sentido contrario y están separadas del eje del fuselaje: forman una cupla que lo retuerce. Además, como los planos están inclinados, para lograr la misma fuerza lateral que una deriva vertical cada plano tiene que empujar más (se divide por el seno del ángulo). Compará los dos últimos valores de arriba.</p>
+      </div>
+      <div class="exam">
+        <h3>Para el parcial</h3>
+        <ul>
+          <li>Mandos del piloto idénticos al convencional.</li>
+          <li>Profundidad: ambos planos en el mismo sentido. Dirección: en sentidos opuestos.</li>
+          <li>Desventaja: mayor torsión sobre el fuselaje.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-ala" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Estructura del ala</p>
+    <h2>Qué hay adentro del ala y qué carga soporta cada pieza</h2>
+    <p class="lede">El ala es una viga en voladizo empotrada en el fuselaje. La sustentación la flexiona hacia arriba y los alerones y flaps la retuercen. Tocá cada componente para verlo y después cargá el ala.</p>
+  </div>
+  <div class="subnav">
+    <button data-sub="comp">Componentes</button>
+    <button data-sub="carga">Cargar el ala</button>
+  </div>
+  <div class="sub" data-sub="comp">
+    <div class="grid">
+      <div class="sim">
+        <div class="seg" data-name="ala-c">
+          <button data-v="all" aria-pressed="true">Todo</button>
+          <button data-v="larguero">Largueros</button>
+          <button data-v="costilla">Costillas maestras</button>
+          <button data-v="revest">Revestimiento</button>
+          <button data-v="herraje">Herrajes</button>
+          <button data-v="falsa">Falsas costillas</button>
+          <button data-v="larguerillo">Larguerillos</button>
+          <button data-v="refuerzo">Refuerzos</button>
+        </div>
+        <canvas id="ala-plan"></canvas>
+        <canvas id="ala-sec"></canvas>
+        <div class="card" id="ala-info" aria-live="polite"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Principal o secundario</h3>
+          <p class="ppt">Según su función, cada componente se denomina <b>principal</b> o <b>secundario</b>.</p>
+          <div class="tablewrap" style="margin-top:8px"><table>
+            <thead><tr><th>Principal</th><th>Secundario</th></tr></thead>
+            <tbody>
+              <tr><td>Largueros</td><td>Falsas costillas</td></tr>
+              <tr><td>Costillas maestras</td><td>Larguerillos</td></tr>
+              <tr><td>Revestimiento</td><td>Refuerzos</td></tr>
+              <tr><td>Herrajes</td><td></td></tr>
+            </tbody>
+          </table></div>
+          <p class="note" style="margin-top:8px">Los principales llevan las cargas grandes; si fallan, falla el ala. Los secundarios dan forma, rigidizan y ayudan, pero el ala no depende de cada uno para no romperse.</p>
+        </div>
+        <div class="card">
+          <h3>Los cuatro principales</h3>
+          <ul class="ppt">
+            <li><b>Larguero (spar):</b> viga a lo largo del ala. Principal soporte: toma <b>flexión y torsión</b>.</li>
+            <li><b>Costilla (rib):</b> va de adelante hacia atrás. <b>Da forma al perfil</b> y <b>transmite la carga del revestimiento a los largueros</b>.</li>
+            <li><b>Revestimiento (sheath):</b> da y mantiene la <b>forma aerodinámica</b> y puede colaborar con la resistencia estructural.</li>
+            <li><b>Herrajes (fitting):</b> piezas metálicas que <b>unen secciones</b> del ala. De su cálculo depende buena parte de la resistencia. Resisten esfuerzos, vibraciones y deflexiones.</li>
+          </ul>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul>
+            <li>Saber la tabla principal / secundario de memoria.</li>
+            <li>Larguero: flexión y torsión. Costilla: forma + transmite carga del revestimiento al larguero.</li>
+            <li>Revestimiento: forma aerodinámica (y colabora). Herrajes: unen secciones.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sub" data-sub="carga" hidden>
+    <div class="grid">
+      <div class="sim">
+        <canvas id="ala-bend"></canvas>
+        <div class="controls">
+          <div class="ctl"><label for="ala-n">Factor de carga n <output for="ala-n"></output></label><input type="range" id="ala-n" min="-1.5" max="6" step="0.1" value="1" data-dec="1" data-unit=" g"></div>
+          <div class="ctl"><label for="ala-t">Alerón (torsión del ala) <output for="ala-t"></output></label><input type="range" id="ala-t" min="-20" max="20" step="1" value="0" data-unit="°"></div>
+        </div>
+        <div class="readouts">
+          <div class="ro"><span>Momento en raíz</span><b id="ala-m">—</b></div>
+          <div class="ro"><span>Corte en raíz</span><b id="ala-v">—</b></div>
+          <div class="ro"><span>Flecha en puntera</span><b id="ala-f">—</b></div>
+          <div class="ro"><span>Tensión máx. larguero</span><b id="ala-s">—</b></div>
+          <div class="ro"><span>Torsión en puntera</span><b id="ala-tw">—</b></div>
+        </div>
+        <div class="status" id="ala-status"></div>
+        <canvas id="ala-diag"></canvas>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Qué estás viendo</h3>
+          <p>Semiala de 8 m de un avión de 5.000 kg, vista de frente. La sustentación (distribución elíptica, flechas verdes) la flexiona hacia arriba; la deformación está exagerada ×3 para que se vea. El color del larguero muestra la tensión de flexión, máxima en el <b>empotramiento</b>.</p>
+          <p style="margin-top:8px">Abajo, los diagramas de <b>esfuerzo de corte</b> y <b>momento flector</b> a lo largo de la envergadura: los dos crecen hacia la raíz. Por eso los largueros son más altos y gruesos en la raíz y los herrajes de unión al fuselaje son piezas críticas.</p>
+        </div>
+        <div class="card">
+          <h3>Factor de carga</h3>
+          <p>n = L / W. En vuelo recto n = 1; en un viraje cerrado o una ráfaga, más. Con n = 3,8 (límite típico de un avión normal) la estructura no debe quedar deformada. Con 1,5 veces eso (carga última, n = 5,7) puede deformarse pero no romperse.</p>
+          <p style="margin-top:8px">El alerón cambia la sustentación cerca de la puntera y retuerce el ala: esa <b>torsión</b> también la toman los largueros junto con el revestimiento.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul>
+            <li>El larguero toma flexión y torsión; las cargas máximas están en la raíz.</li>
+            <li>Las costillas llevan la carga del revestimiento al larguero.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-mat" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Materiales aeroespaciales</p>
+    <h2>Con qué se construye un avión y por qué</h2>
+    <p class="lede">En aeronáutica todo se mide contra el peso: no alcanza con que un material sea resistente, tiene que ser resistente <b>para lo que pesa</b>. Recorré acero, aluminio, compuestos y estructuras sándwich.</p>
+  </div>
+  <div class="subnav">
+    <button data-sub="acero">Acero SAE</button>
+    <button data-sub="tt">Tratamientos térmicos</button>
+    <button data-sub="alu">Aluminio</button>
+    <button data-sub="comp">Compuestos</button>
+    <button data-sub="sand">Sándwich</button>
+  </div>
+
+  <div class="sub" data-sub="acero">
+    <div class="grid">
+      <div class="sim">
+        <div class="row">
+          <label for="st-code" class="seglabel" style="margin:0">Elegí un acero:</label>
+          <select id="st-code">
+            <option value="1020">SAE 1020</option><option value="1045">SAE 1045</option><option value="2330">SAE 2330</option><option value="3140">SAE 3140</option>
+            <option value="4130" selected>SAE 4130</option><option value="4340">SAE 4340</option><option value="5140">SAE 5140</option><option value="6150">SAE 6150</option>
+            <option value="8620">SAE 8620</option><option value="9260">SAE 9260</option>
+          </select>
+        </div>
+        <div class="digits" id="st-digits"></div>
+        <div class="card" id="st-decode" style="padding:10px 12px"></div>
+        <canvas id="st-carbon"></canvas>
+        <h3 style="margin:6px 0 0">Fuselaje reticular de acero 4130 (Cr-Mo)</h3>
+        <canvas id="st-truss"></canvas>
+        <div class="controls">
+          <div class="ctl"><label for="st-n">Factor de carga <output for="st-n"></output></label><input type="range" id="st-n" min="1" max="6" step="0.1" value="3.8" data-dec="1" data-unit=" g"></div>
+          <div class="ctl"><label for="st-tail">Carga en la cola <output for="st-tail"></output></label><input type="range" id="st-tail" min="-1500" max="1500" step="50" value="-400" data-unit=" N"></div>
+          <div class="ctl"><label for="st-d">Diámetro de los tubos <output for="st-d"></output></label><input type="range" id="st-d" min="12" max="30" step="1" value="19" data-unit=" mm"></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--bad)"></i>Tracción</span><span><i style="background:var(--accent)"></i>Compresión</span><span>grosor = fuerza</span></div>
+        <div class="status" id="st-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Designación SAE</h3>
+          <ul class="ppt">
+            <li>El <b>primer dígito</b> indica el <b>aleante principal</b>.</li>
+            <li>El <b>segundo dígito</b> indica el <b>porcentaje aproximado</b> del aleante principal.</li>
+            <li>El <b>tercer y cuarto dígito</b> indican el <b>porcentaje medio de carbono en centésimas</b>.</li>
+          </ul>
+          <p style="margin-top:8px">Ejemplo: <b>4130</b> → familia del molibdeno (41 = cromo-molibdeno), <b>0,30 % de carbono</b>. En la práctica los dos primeros dígitos juntos identifican la serie.</p>
+        </div>
+        <div class="card">
+          <h3>El carbono manda</h3>
+          <p>Más carbono → más duro y resistente, pero más frágil y más difícil de soldar. El 4130 tiene poco carbono (0,30 %) y cromo-molibdeno: es fuerte, tenaz y <b>se suelda bien</b>. Por eso es el acero clásico de los <b>fuselajes reticulados</b> de tubos soldados, bancadas de motor y trenes de aterrizaje de avionetas.</p>
+        </div>
+        <div class="card">
+          <h3>Fuselaje reticular</h3>
+          <p>Es un reticulado de tubos (largueros superiores e inferiores, montantes y diagonales) que se apoya en el ala. Cada tubo trabaja solo a tracción o a compresión. Los comprimidos pueden <b>pandear</b>: por eso el diámetro importa tanto. Achicá el diámetro o subí el factor de carga y mirá qué tubo falla primero.</p>
+          <p class="note" style="margin-top:6px">Cálculo real por el método de rigidez sobre un lateral del fuselaje (la mitad de la carga). Tubos de 0,9 mm de pared, E = 205 GPa, σ fluencia ≈ 460 MPa.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul>
+            <li>Saber decodificar un número SAE de 4 dígitos.</li>
+            <li>Acero al cromo-molibdeno (4130): fuselajes reticulados.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="tt" hidden>
+    <div class="grid">
+      <div class="sim">
+        <div class="seg" data-name="tt-type">
+          <button data-v="recocido" aria-pressed="true">Recocido</button>
+          <button data-v="normalizado">Normalizado</button>
+          <button data-v="temple">Temple</button>
+          <button data-v="revenido">Temple + revenido</button>
+          <button data-v="soluc">Aluminio: solución + envejecido</button>
+        </div>
+        <canvas id="tt-chart"></canvas>
+        <div class="controls" id="tt-rev-ui">
+          <div class="ctl"><label for="tt-rev">Temperatura de revenido <output for="tt-rev"></output></label><input type="range" id="tt-rev" min="200" max="650" step="10" value="450" data-unit=" °C"></div>
+        </div>
+        <canvas id="tt-props"></canvas>
+        <div class="status" id="tt-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Qué es un tratamiento térmico</h3>
+          <p>Calentar el metal a una temperatura, mantenerlo y enfriarlo a una velocidad controlada. No cambia la composición: cambia la <b>estructura interna</b> y con ella la dureza, la resistencia y la ductilidad.</p>
+          <p class="note" style="margin-top:6px">El PPT solo nombra el tema. Esta pestaña lo explica con valores orientativos para un acero 4130 y para el aluminio 2024 / 7075.</p>
+        </div>
+        <div class="card">
+          <h3>Los básicos</h3>
+          <ul>
+            <li><b>Recocido:</b> calentar y enfriar muy lento (dentro del horno). Ablanda y quita tensiones: el material queda fácil de mecanizar y doblar.</li>
+            <li><b>Normalizado:</b> calentar y enfriar al aire. Afina el grano; queda algo más resistente que recocido. El 4130 de tubos suele venir normalizado.</li>
+            <li><b>Temple:</b> calentar y enfriar de golpe (agua o aceite). Muy duro y resistente, pero frágil.</li>
+            <li><b>Revenido:</b> después del temple, recalentar a temperatura moderada. Devuelve tenacidad a cambio de algo de dureza. Cuanto más alta la temperatura, más tenaz y menos duro.</li>
+            <li><b>Solución + envejecimiento (aluminio):</b> calentar para disolver el cobre o el zinc, templar, y dejar que precipiten partículas finas que endurecen. Natural (a temperatura ambiente, T3/T4) o artificial (en horno, T6).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="alu" hidden>
+    <div class="grid">
+      <div class="sim">
+        <canvas id="al-chart"></canvas>
+        <div class="seg" data-name="al-load">
+          <button data-v="up" aria-pressed="true">Vuelo normal (ala hacia arriba)</button>
+          <button data-v="down">Carga negativa</button>
+        </div>
+        <canvas id="al-wing"></canvas>
+        <div class="status" id="al-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Las dos aleaciones del PPT</h3>
+          <ul class="ppt">
+            <li><b>Al 2024-T3:</b> aleación de <b>aluminio-cobre</b> con tratamiento de <b>solución y trabajo en frío</b>.</li>
+            <li><b>Al 7075-T6:</b> aleación de <b>aluminio-zinc</b> con tratamiento de <b>solución y envejecimiento artificial</b>.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Cómo se lee el nombre</h3>
+          <p><b>Primer dígito = serie:</b> 2xxx cobre, 7xxx zinc. <b>Letra y número = temple:</b> T3 = solución + trabajo en frío + envejecido natural. T6 = solución + envejecido artificial (horno).</p>
+        </div>
+        <div class="card">
+          <h3>Dónde va cada una</h3>
+          <p>El 7075-T6 es más resistente: se usa donde el ala trabaja a <b>compresión</b> (revestimiento superior, cordones superiores de largueros). El 2024-T3 es un poco menos resistente pero mucho mejor a la <b>fatiga</b> y más tolerante al daño: va donde hay <b>tracción</b> que se repite en cada vuelo (revestimiento inferior del ala, fuselaje presurizado).</p>
+          <p class="note" style="margin-top:6px">Valores típicos de bibliografía (MMPDS / fabricantes); varían con el espesor y la forma del producto.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul><li>2024-T3: Al-Cu, solución + trabajo en frío.</li><li>7075-T6: Al-Zn, solución + envejecimiento artificial.</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="comp" hidden>
+    <div class="grid">
+      <div class="sim">
+        <div class="seg" data-name="cp-fib">
+          <button data-v="vidrio">Fibra de vidrio</button>
+          <button data-v="carbono" aria-pressed="true">Fibra de carbono</button>
+          <button data-v="kevlar">Kevlar 49</button>
+        </div>
+        <canvas id="cp-lam"></canvas>
+        <div class="controls">
+          <div class="ctl"><label for="cp-vf">Fracción de fibra <output for="cp-vf"></output></label><input type="range" id="cp-vf" min="30" max="70" step="1" value="60" data-unit=" %"></div>
+          <div class="ctl"><label for="cp-th">Ángulo entre la carga y las fibras <output for="cp-th"></output></label><input type="range" id="cp-th" min="0" max="90" step="1" value="0" data-unit="°"></div>
+        </div>
+        <canvas id="cp-bars"></canvas>
+        <div class="status" id="cp-status"></div>
+        <h3 style="margin:6px 0 0">Curado de la resina</h3>
+        <canvas id="cp-cure"></canvas>
+        <div class="row"><button class="btn primary" id="cp-cure-go" type="button">Curar en autoclave</button><span class="note">Ciclo típico de epoxi: rampa a 180 °C, meseta, enfriamiento.</span></div>
+        <h3 style="margin:6px 0 0">Un filamento de carbono al calentarse</h3>
+        <canvas id="cp-fil"></canvas>
+        <div class="ctl"><label for="cp-temp">Temperatura <output for="cp-temp"></output></label><input type="range" id="cp-temp" min="20" max="400" step="5" value="20" data-unit=" °C"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Qué es un material compuesto</h3>
+          <p class="ppt">El resultado de <b>unir dos materiales para lograr un efecto sinérgico</b>. Los más usados son <b>fibras</b> (a veces en forma de tela) de <b>carbono, kevlar o vidrio</b> unidas con una <b>resina polimérica</b>. La resina es <b>líquida al principio</b>, permite darle forma, y después de <b>curar</b> queda <b>rígida</b>. Permiten componentes <b>extralivianos</b>.</p>
+          <p style="margin-top:8px">La fibra pone la resistencia y la rigidez; la resina mantiene las fibras en su lugar y les reparte la carga. Lo vas a ver en la barra de rigidez: el compuesto rinde muchísimo <b>en la dirección de la fibra</b> y poco a 90°. Por eso se apilan capas en distintas orientaciones.</p>
+        </div>
+        <div class="card">
+          <h3>Fibra de carbono</h3>
+          <ul class="ppt">
+            <li>Estructura atómica parecida al <b>grafito</b>: láminas de carbono en patrón <b>hexagonal</b>.</li>
+            <li>Densidad <b>1.750 kg/m³</b>. Conductora eléctrica y de alta conductividad térmica.</li>
+            <li>Al calentarse, un filamento se hace <b>más grueso y más corto</b> (lo ves en la última simulación).</li>
+            <li>Muy alta resistencia y módulo elástico, baja densidad frente al acero, resistente a agentes externos, precio elevado. Conserva su forma con la temperatura solo con matriz termoestable.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Kevlar 29 y 49</h3>
+          <div class="tablewrap"><table>
+            <thead><tr><th></th><th>Kevlar 29</th><th>Kevlar 49</th></tr></thead>
+            <tbody>
+              <tr><td>Qué es</td><td>La fibra tal como sale de fabricación</td><td>Fibra tratada en superficie para pegarse a la resina</td></tr>
+              <tr><td>Uso</td><td>Tiras de refuerzo, tejidos, cables, ropa de protección, chalecos antibalas</td><td>Embebida en resina: aviones, satélites de comunicaciones, deportes extremos, altavoces, cascos</td></tr>
+              <tr><td>Módulo aprox.</td><td class="num">70 GPa</td><td class="num">124 GPa</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <h3>Fibra de vidrio</h3>
+          <p>La más barata y la más pesada de las tres, con menor rigidez. Es <b>transparente a las ondas de radio</b>, por eso se usa en radomos, carenados y piezas secundarias.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul>
+            <li>Definición: dos materiales unidos con efecto sinérgico (fibra + resina).</li>
+            <li>Resina líquida → forma → curado → rígida.</li>
+            <li>Carbono: grafito hexagonal, 1.750 kg/m³, conductor, se acorta y engrosa al calentarse.</li>
+            <li>Kevlar 29 (fibra tal cual) vs 49 (tratada para resina).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="sand" hidden>
+    <div class="grid">
+      <div class="sim">
+        <canvas id="sw-sec"></canvas>
+        <div class="seg" data-name="sw-core">
+          <button data-v="nomex" aria-pressed="true">Panal Nomex 48 kg/m³</button>
+          <button data-v="alhc">Panal de aluminio 83 kg/m³</button>
+          <button data-v="foam">Espuma 110 kg/m³</button>
+        </div>
+        <div class="controls">
+          <div class="ctl"><label for="sw-tc">Espesor del núcleo <output for="sw-tc"></output></label><input type="range" id="sw-tc" min="0" max="40" step="1" value="12" data-unit=" mm"></div>
+          <div class="ctl"><label for="sw-tf">Espesor de cada chapa <output for="sw-tf"></output></label><input type="range" id="sw-tf" min="0.3" max="2" step="0.1" value="0.5" data-dec="1" data-unit=" mm"></div>
+          <div class="ctl"><label for="sw-p">Carga repartida <output for="sw-p"></output></label><input type="range" id="sw-p" min="0" max="5" step="0.1" value="2" data-dec="1" data-unit=" kPa"></div>
+        </div>
+        <canvas id="sw-beam"></canvas>
+        <div class="readouts">
+          <div class="ro"><span>Peso del panel</span><b id="sw-w">—</b></div>
+          <div class="ro"><span>Chapa maciza del mismo peso</span><b id="sw-teq">—</b></div>
+          <div class="ro"><span>Rigidez sándwich / maciza</span><b id="sw-ratio">—</b></div>
+        </div>
+        <div class="status" id="sw-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Qué es</h3>
+          <p class="ppt">Dos <b>chapas de gran resistencia separadas por un material de baja densidad</b>. Compite con los materiales convencionales en <b>resistencia, solidez y peso</b>. Donde no hay grandes solicitaciones y una chapa fina se deformaría fácil, el sándwich es muy superior en la relación <b>resistencia-peso</b>.</p>
+        </div>
+        <div class="card">
+          <h3>Por qué funciona</h3>
+          <p>Al flexionar, la cara de arriba se comprime y la de abajo se tracciona. Cuanto más lejos están las caras entre sí, más rigidez: crece con el <b>cuadrado de la separación</b>. El núcleo casi no pesa; solo las mantiene separadas y toma el corte. Es la misma idea que la doble T de un larguero.</p>
+          <p style="margin-top:8px">Probalo: con núcleo 0 tenés solo las dos chapas pegadas. Subí el núcleo a 10–20 mm: el peso apenas cambia y la rigidez se multiplica cientos de veces.</p>
+        </div>
+        <div class="card">
+          <h3>Dónde se usa</h3>
+          <p>Pisos de cabina, superficies de mando, carenados, paneles de satélites, palas de helicóptero.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul><li>Dos chapas resistentes + núcleo liviano.</li><li>Ventaja: relación resistencia-peso, sobre todo donde chapas finas se deformarían.</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-tps" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Materiales · Protección térmica</p>
+    <h2>Sobrevivir al calor de la reentrada y al frío del espacio</h2>
+    <p class="lede">Un vehículo que vuelve del espacio tiene que frenar desde casi 8 km/s usando la atmósfera, y un satélite en órbita pasa de pleno sol a sombra total cada vuelta. Cada problema tiene su material.</p>
+  </div>
+  <div class="subnav">
+    <button data-sub="reent">Reentrada (TPS)</button>
+    <button data-sub="abl">Ablativos</button>
+    <button data-sub="mli">Mantas MLI</button>
+    <button data-sub="vac">Vacío térmico</button>
+  </div>
+
+  <div class="sub" data-sub="reent">
+    <div class="grid">
+      <div class="sim">
+        <canvas id="tps-ship"></canvas>
+        <div class="controls">
+          <div class="ctl"><label for="tps-t">Tiempo desde la interfaz de entrada <output for="tps-t"></output></label><input type="range" id="tps-t" min="0" max="1800" step="5" value="750" data-unit=" s"></div>
+          <div class="ctl" style="justify-content:flex-end"><div class="row"><button class="btn primary" id="tps-play" type="button">Reproducir reentrada</button><button class="btn" id="tps-bare" type="button" aria-pressed="false">Quitar el TPS</button></div></div>
+        </div>
+        <div class="readouts">
+          <div class="ro"><span>Altura</span><b id="tps-h">—</b></div>
+          <div class="ro"><span>Velocidad</span><b id="tps-v">—</b></div>
+          <div class="ro"><span>Flujo de calor en la nariz</span><b id="tps-q">—</b></div>
+        </div>
+        <canvas id="tps-zones"></canvas>
+        <canvas id="tps-traj"></canvas>
+        <div class="status" id="tps-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>De dónde sale el calor</h3>
+          <p class="ppt">Los vehículos que entran a la atmósfera, como el Orbiter del transbordador, necesitan un <b>sistema de protección térmica (TPS)</b> contra el <b>calentamiento aerodinámico</b>, que se genera en la superficie por la combinación de la <b>compresión y la fricción del gas atmosférico</b>.</p>
+          <p style="margin-top:8px">Delante del vehículo se forma una onda de choque: el aire se comprime de golpe y se calienta a miles de grados. Ese gas caliente toca la superficie. El calentamiento crece con el <b>cubo de la velocidad</b>; por eso el pico no está arriba de todo (aire muy poco denso) ni abajo (ya frenó), sino en el medio, cerca de los 70 km.</p>
+        </div>
+        <div class="card">
+          <h3>Tres materiales, tres zonas</h3>
+          <ul class="ppt">
+            <li><b>RCC (carbono-carbono reforzado):</b> nariz y bordes de ataque de las alas, las partes más expuestas. Soporta las temperaturas más altas.</li>
+            <li><b>HRSI (losetas cerámicas de sílice):</b> la panza. Temperaturas muy altas pero menos críticas que las del RCC. Recubiertas de negro para irradiar el calor.</li>
+            <li><b>AFRSI (manta flexible de tela de fibra de sílice):</b> zonas superiores, protección moderada.</li>
+          </ul>
+          <p style="margin-top:8px">El transbordador entraba con unos 40° de ángulo de ataque, mostrando la panza a la corriente: por eso la cara inferior recibe mucho más calor que la superior. Abajo de todo está la estructura de aluminio, que no puede pasar de unos 175 °C.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul>
+            <li>TPS: protege del calentamiento aerodinámico (compresión + fricción del gas).</li>
+            <li>RCC → nariz y bordes de ataque. HRSI → losetas cerámicas de sílice negras. AFRSI → manta flexible de fibra de sílice, protección moderada.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="abl" hidden>
+    <div class="grid">
+      <div class="sim">
+        <div class="seg" data-name="abl-mode">
+          <button data-v="caps" aria-pressed="true">Escudo de cápsula en reentrada</button>
+          <button data-v="astm">Ensayo ASTM E285 (soplete oxiacetilénico)</button>
+        </div>
+        <canvas id="abl-sec"></canvas>
+        <div class="controls">
+          <div class="ctl"><label for="abl-q">Flujo de calor <output for="abl-q"></output></label><input type="range" id="abl-q" min="100" max="1000" step="10" value="400" data-unit=" W/cm²"></div>
+          <div class="ctl"><label for="abl-L">Espesor del escudo <output for="abl-L"></output></label><input type="range" id="abl-L" min="8" max="50" step="1" value="25" data-unit=" mm"></div>
+        </div>
+        <div class="row"><button class="btn primary" id="abl-go" type="button">Iniciar</button><button class="btn" id="abl-reset" type="button">Reiniciar</button></div>
+        <div class="readouts">
+          <div class="ro"><span>Tiempo</span><b id="abl-t">—</b></div>
+          <div class="ro"><span>Material consumido</span><b id="abl-r">—</b></div>
+          <div class="ro"><span>Superficie</span><b id="abl-ts">—</b></div>
+          <div class="ro"><span>Cara interior</span><b id="abl-tb">—</b></div>
+        </div>
+        <canvas id="abl-plot"></canvas>
+        <div class="status" id="abl-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Material de sacrificio</h3>
+          <p class="ppt">Los ablativos son materiales <b>fungibles (de sacrificio)</b>: protegen elementos recuperables expuestos a <b>≥ 1500 °C</b>. Sus funciones: ser <b>refractarios, aislantes térmicos, autoconsumibles y resistentes al desgaste</b>.</p>
+          <p style="margin-top:8px">El calor no se bloquea: se gasta. La resina del material se descompone (pirólisis) absorbiendo energía, los gases que salen empujan la capa caliente lejos de la superficie, y queda una capa de carbón (char) que irradia y se va consumiendo. Mientras tanto, la cara interior sigue fría.</p>
+        </div>
+        <div class="card">
+          <h3>Las capas que vas a ver</h3>
+          <ul>
+            <li><b>Char:</b> capa carbonizada en la superficie, la que se consume.</li>
+            <li><b>Zona de pirólisis:</b> la resina se está descomponiendo.</li>
+            <li><b>Material virgen:</b> todavía intacto y frío.</li>
+            <li><b>Estructura:</b> lo que hay que proteger.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>ASTM E285</h3>
+          <p class="ppt">Método estándar de <b>ablación con soplete oxiacetilénico</b>. Como los gases de combustión se parecen al ambiente de un motor cohete, es más aplicable a <b>toberas e interiores de motores</b> que al calentamiento aerodinámico.</p>
+          <p class="note" style="margin-top:6px">Modelo 1D por diferencias finitas con propiedades típicas de un compuesto carbono-fenólico (ρ = 1450 kg/m³, k = 0,6 W/m·K, calor efectivo de ablación 25 MJ/kg).</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul><li>Fungibles / de sacrificio, ≥ 1500 °C.</li><li>Refractario, aislante, autoconsumible, resistente al desgaste.</li><li>ASTM E285: oxiacetileno, más representativo de motores cohete.</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="mli" hidden>
+    <div class="grid">
+      <div class="sim">
+        <canvas id="mli-orbit"></canvas>
+        <div class="seg" data-name="mli-n">
+          <button data-v="0">Sin MLI (caja pintada)</button>
+          <button data-v="1">MLI 1 capa</button>
+          <button data-v="5">MLI 5 capas</button>
+          <button data-v="20" aria-pressed="true">MLI 20 capas</button>
+        </div>
+        <div class="ctl"><label for="mli-p">Potencia de la electrónica <output for="mli-p"></output></label><input type="range" id="mli-p" min="20" max="200" step="5" value="100" data-unit=" W"></div>
+        <div class="readouts">
+          <div class="ro"><span>Cara al sol</span><b id="mli-ts">—</b></div>
+          <div class="ro"><span>Cara en sombra</span><b id="mli-tsh">—</b></div>
+          <div class="ro"><span>Electrónica</span><b id="mli-ti">—</b></div>
+        </div>
+        <canvas id="mli-plot"></canvas>
+        <div class="status" id="mli-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Caliente y frío al mismo tiempo</h3>
+          <p class="ppt">En el vacío no hay aire: la <b>radiación térmica</b> es la que manda (no la convección ni la conducción). Un objeto puede estar <b>caliente de un lado y frío del otro</b> a la vez, con un lado al sol y el otro a la sombra.</p>
+          <p style="margin-top:8px">Satélite en órbita baja: 92 minutos por vuelta, de los cuales unos 36 están en la sombra de la Tierra. Mirá las temperaturas de las caras.</p>
+        </div>
+        <div class="card">
+          <h3>Aislamiento multicapa (MLI)</h3>
+          <p class="ppt">Capas de <b>película plástica muy delgada con recubrimiento metálico</b>, separadas por un <b>"espaciador" de baja conductividad</b> (seda, nailon o red de fibra de vidrio). El MLI <b>reflectante</b> minimiza el intercambio por radiación.</p>
+          <p style="margin-top:8px">Cada capa refleja casi todo lo que recibe y reemite muy poco hacia la siguiente; con 20 capas el sol de afuera casi no llega a la electrónica. El calor que genera la electrónica se saca por un <b>radiador</b> controlado (la cara clara que mira al espacio).</p>
+          <p class="ppt" style="margin-top:8px">El objetivo del control térmico es <b>mantener la temperatura dentro de los límites</b> para que electrónica y mecanismos funcionen bien y no haya distorsiones estructurales. Colocar mantas MLI es un <b>arte experto</b>: hay que darles formas complejas alrededor de bordes y juntas.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul><li>En el espacio domina la radiación.</li><li>MLI: películas metalizadas + espaciador de baja conductividad.</li><li>Objetivo: mantener la temperatura dentro de límites.</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub" data-sub="vac" hidden>
+    <div class="grid">
+      <div class="sim">
+        <div class="seg" data-name="vac-orb">
+          <button data-v="leo" aria-pressed="true">Órbita baja (LEO)</button>
+          <button data-v="meo">Órbita media (MEO)</button>
+          <button data-v="geo">Geoestacionaria (GEO)</button>
+        </div>
+        <canvas id="vac-ch"></canvas>
+        <div class="row"><button class="btn primary" id="vac-go" type="button">Iniciar ensayo</button><span class="note" id="vac-note"></span></div>
+        <canvas id="vac-plot"></canvas>
+        <div class="status" id="vac-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>El ensayo</h3>
+          <p class="ppt">Las variaciones térmicas extremas imponen <b>solicitaciones térmicas, mecánicas y eléctricas severas</b>. Uno de los ensayos ambientales más importantes es el de <b>ciclado térmico</b>, en <b>cámaras de ciclado térmico</b> que hacen ciclos en tiempos breves entre las temperaturas típicas de misiones en <b>órbitas bajas, medias y geoestacionarias</b>.</p>
+          <p style="margin-top:8px">Primero se hace vacío (de 1 atmósfera a una millonésima de milibar) para que, como en el espacio, el calor solo se mueva por radiación. Después las paredes de la cámara (shrouds) se calientan y enfrían; el satélite las sigue con retraso por su inercia térmica.</p>
+        </div>
+        <div class="card">
+          <h3>Ejemplo real</h3>
+          <p class="ppt">El satélite <b>GOES-S</b> de la NOAA entró a una cámara de vacío térmico para probar que funciona en el frío vacío de su órbita a <b>22.300 millas</b> (≈ 35.900 km) sobre la Tierra: la órbita geoestacionaria.</p>
+          <p class="note" style="margin-top:6px">Los rangos de temperatura del ensayo son ejemplos típicos; cada programa define los suyos.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul><li>Ensayo de ciclado térmico en cámara de vacío.</li><li>Simula ciclos de órbitas bajas, medias y geoestacionarias en tiempos cortos.</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-fab" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Procesos de fabricación</p>
+    <h2>De una idea a un avión en servicio</h2>
+    <p class="lede">Recorré las etapas en orden. Cada una tiene una pequeña simulación. Fijate en las flechas que vuelven hacia atrás: el proceso se corrige a sí mismo con lo que aprende en los ensayos.</p>
+  </div>
+  <div class="grid">
+    <div class="sim">
+      <canvas id="fab-flow"></canvas>
+      <div class="steps" id="fab-steps"></div>
+      <div>
+        <p class="eyebrow" id="fab-group"></p>
+        <h3 id="fab-title"></h3>
+      </div>
+      <canvas id="fab-cv"></canvas>
+      <div id="fab-ctl" class="controls"></div>
+      <div class="status" id="fab-status"></div>
+      <div class="row" style="justify-content:space-between"><button class="btn" id="fab-prev" type="button">← Etapa anterior</button><button class="btn primary" id="fab-next" type="button">Etapa siguiente →</button></div>
+    </div>
+    <div class="explain">
+      <div class="card">
+        <h3 id="fab-ptitle">Lo que dice el PPT</h3>
+        <div id="fab-ppt" class="ppt"></div>
+      </div>
+      <div class="card">
+        <h3>En la simulación</h3>
+        <p id="fab-how"></p>
+      </div>
+      <div class="exam">
+        <h3>Para el parcial</h3>
+        <ol style="padding-left:20px">
+          <li>Estudios preliminares y anteproyecto (requerimientos + cálculo teórico)</li>
+          <li>Ensayos en túnel aerodinámico (maquetas + revisión de cálculos)</li>
+          <li>Proyecto del avión (proyecto final + selección de componentes)</li>
+          <li>Mock up</li>
+          <li>Fabricación de componentes (vendors, matrices, utillajes)</li>
+          <li>Prototipos (ensayo estructural, rediseño)</li>
+          <li>Ensayos en vuelo y certificación</li>
+          <li>Producción en serie</li>
+          <li>Comportamiento en servicio</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-tsio" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Ecuación de Tsiolkovsky</p>
+    <h2>Cuánta velocidad gana un cohete al quemar su propelente</h2>
+    <p class="lede">Un cohete avanza tirando masa hacia atrás a gran velocidad. Cuanto más rápido sale el gas y cuanto más grande es la parte de la masa que se quema, más velocidad gana.</p>
+  </div>
+  <div class="grid">
+    <div class="sim">
+      <canvas id="ts-rocket"></canvas>
+      <div>
+        <div class="seglabel">Propelente</div>
+        <div class="seg" data-name="ts-prop">
+          <button data-v="250">Sólido · Isp 250 s</button>
+          <button data-v="311" aria-pressed="true">Kerosene + LOX · Isp 311 s</button>
+          <button data-v="450">Hidrógeno + LOX · Isp 450 s</button>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="ctl"><label for="ts-m0">Masa inicial M₀ <output for="ts-m0"></output></label><input type="range" id="ts-m0" min="20" max="500" step="5" value="100" data-unit=" t"></div>
+        <div class="ctl"><label for="ts-mp">Porcentaje de propelente <output for="ts-mp"></output></label><input type="range" id="ts-mp" min="30" max="95" step="1" value="85" data-unit=" %"></div>
+        <div class="ctl"><label for="ts-tb">Tiempo de combustión <output for="ts-tb"></output></label><input type="range" id="ts-tb" min="60" max="400" step="10" value="160" data-unit=" s"></div>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="ts-go" type="button">Encender motor</button>
+        <div class="seg" data-name="ts-grav"><button data-v="no" aria-pressed="true">En el espacio (sin gravedad)</button><button data-v="si">Despegue vertical (con gravedad)</button></div>
+      </div>
+      <div class="readouts">
+        <div class="ro"><span>c = Isp · g₀</span><b id="ts-c">—</b></div>
+        <div class="ro"><span>Radio de masa M₀/Mf</span><b id="ts-r">—</b></div>
+        <div class="ro"><span>ΔV ideal</span><b id="ts-dv">—</b></div>
+        <div class="ro"><span>Velocidad ahora</span><b id="ts-vnow">—</b></div>
+      </div>
+      <canvas id="ts-plot"></canvas>
+      <div class="status" id="ts-status"></div>
+    </div>
+    <div class="explain">
+      <div class="card">
+        <h3>La ecuación</h3>
+        <p>En un instante dt el cohete expulsa una masa dm de gas hacia atrás con velocidad c respecto del cohete. Por conservación de la cantidad de movimiento:</p>
+        <div class="formula" style="margin-top:6px">M · dV = −c · dM</div>
+        <p style="margin-top:6px" class="ppt">Integrando entre la masa inicial y la final, <b>sin tener en cuenta la gravedad ni el arrastre aerodinámico</b>:</p>
+        <div class="formula" style="margin-top:6px">ΔV = c · ln(M₀ / Mf)  con  c = Isp · g₀</div>
+        <p style="margin-top:8px">El logaritmo es la clave: duplicar el radio de masa no duplica la velocidad. Para ganar mucho ΔV hace falta que casi todo el cohete sea propelente, y eso tiene un límite: tanques y motores pesan. De ahí salen las etapas (siguiente pestaña).</p>
+      </div>
+      <div class="card">
+        <h3>Konstantin Tsiolkovsky</h3>
+        <p class="ppt">Científico e ingeniero ruso (Izhevsk, 17/09/1857 – Kaluga, 19/09/1935), pionero de la teoría de cohetes y la propulsión espacial. Su ecuación describe cómo cambia la velocidad del cohete según la masa expulsada y la velocidad de escape del propulsor; es la base del diseño de cohetes.</p>
+      </div>
+      <div class="card">
+        <h3>¿Y la gravedad?</h3>
+        <p>La ecuación ideal no la cuenta. Si el cohete sube en vertical, la gravedad le resta g·t mientras quema: <b>ΔV real ≈ c·ln(M₀/Mf) − g·t</b>. Por eso los motores de despegue tienen que quemar rápido. Probalo con el modo "Despegue vertical" y alargá el tiempo de combustión.</p>
+      </div>
+      <div class="exam">
+        <h3>Para el parcial</h3>
+        <ul>
+          <li>ΔV = c·ln(M₀/Mf), sin gravedad ni arrastre.</li>
+          <li>Depende solo de la velocidad de escape y del radio de masa, no del tiempo de combustión.</li>
+          <li>Ejemplo: c = 3.050 m/s, M₀/Mf = 5 → ΔV = 3.050·ln 5 ≈ 4.909 m/s.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="p-etapas" hidden>
+  <div class="unit-head">
+    <p class="eyebrow">Unidad · Cálculo de etapas y órbitas</p>
+    <h2>Por qué los lanzadores tienen etapas y a qué velocidad hay que llegar</h2>
+    <p class="lede">Una etapa que ya quemó su propelente es peso muerto. Soltarla hace que el resto del cohete arranque de nuevo con un radio de masa favorable.</p>
+  </div>
+  <div class="subnav">
+    <button data-sub="et">1 etapa vs 2 etapas</button>
+    <button data-sub="orb">Órbitas</button>
+  </div>
+  <div class="sub" data-sub="et">
+    <div class="grid">
+      <div class="sim">
+        <canvas id="et-rocket"></canvas>
+        <div class="controls">
+          <div class="ctl"><label for="et-ml"><span>Carga útil M<sub>L</sub></span> <output for="et-ml"></output></label><input type="range" id="et-ml" min="0.5" max="20" step="0.5" value="5" data-dec="1" data-unit=" t"></div>
+          <div class="ctl"><label for="et-mp"><span>Propelente total M<sub>P</sub></span> <output for="et-mp"></output></label><input type="range" id="et-mp" min="50" max="600" step="10" value="300" data-unit=" t"></div>
+          <div class="ctl"><label for="et-eps">Estructura / (estructura + propelente) <output for="et-eps"></output></label><input type="range" id="et-eps" min="4" max="20" step="0.5" value="8" data-dec="1" data-unit=" %"></div>
+          <div class="ctl"><label for="et-isp">Isp de los motores <output for="et-isp"></output></label><input type="range" id="et-isp" min="250" max="450" step="5" value="330" data-unit=" s"></div>
+          <div class="ctl"><label for="et-f">Propelente en la 1ª etapa <output for="et-f"></output></label><input type="range" id="et-f" min="50" max="92" step="1" value="78" data-unit=" %"></div>
+        </div>
+        <div class="row"><button class="btn primary" id="et-go" type="button">Lanzar los dos</button></div>
+        <canvas id="et-bars"></canvas>
+        <div class="tablewrap"><table id="et-table"></table></div>
+        <div class="status" id="et-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Masas del lanzador</h3>
+          <ul class="ppt"><li><b>M<sub>L</sub></b> = masa de carga útil</li><li><b>M<sub>P</sub></b> = masa de propelente</li><li><b>M<sub>S</sub></b> = masa estructural</li></ul>
+          <div class="formula" style="margin-top:6px">M₀ = M<sub>L</sub> + M<sub>P</sub> + M<sub>S</sub>     M<sub>b</sub> = M<sub>L</sub> + M<sub>S</sub></div>
+          <p class="ppt" style="margin-top:6px"><b>Radio de masa</b> = masa inicial / masa al final del período de empuje.</p>
+        </div>
+        <div class="card">
+          <h3>Lanzador de 1 etapa</h3>
+          <div class="formula">R = (M<sub>L</sub> + M<sub>P</sub> + M<sub>S</sub>) / (M<sub>L</sub> + M<sub>S</sub>)    ΔV = c·ln R</div>
+          <p style="margin-top:6px">Toda la estructura (tanques vacíos, motores) viaja hasta el final.</p>
+        </div>
+        <div class="card">
+          <h3>Lanzador de 2 etapas</h3>
+          <div class="formula">R₁ = M₀ / (M₀ − M<sub>P1</sub>)    R₂ = (M<sub>L</sub> + M<sub>P2</sub> + M<sub>S2</sub>) / (M<sub>L</sub> + M<sub>S2</sub>)</div>
+          <div class="formula" style="margin-top:6px">ΔV = c·ln R₁ + c·ln R₂</div>
+          <p style="margin-top:6px">Al terminar la 1ª etapa se suelta su estructura M<sub>S1</sub>. La 2ª etapa arranca liviana. Con <b>el mismo propelente y la misma estructura total</b>, el ΔV sube mucho.</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul><li>Escribir M₀, M<sub>b</sub> y el radio de masa para cada etapa.</li><li>ΔV total = suma de los ΔV de cada etapa.</li><li>Para órbita baja hacen falta unos 7,8 km/s de velocidad orbital + 1,5 a 2 km/s de pérdidas (gravedad y arrastre).</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sub" data-sub="orb" hidden>
+    <div class="grid">
+      <div class="sim">
+        <canvas id="ob-cv"></canvas>
+        <div class="ctl"><label for="ob-h">Altura de la órbita circular <output for="ob-h"></output></label><input type="range" id="ob-h" min="0" max="1000" step="1" value="200"></div>
+        <div class="row"><button class="btn" data-h="400" type="button">Estación Espacial (400 km)</button><button class="btn" data-h="20200" type="button">GPS (20.200 km)</button><button class="btn" data-h="35786" type="button">Geoestacionaria (35.786 km)</button></div>
+        <div class="readouts">
+          <div class="ro"><span>Velocidad orbital</span><b id="ob-v">—</b></div>
+          <div class="ro"><span>Período</span><b id="ob-T">—</b></div>
+          <div class="ro"><span>Velocidad de escape</span><b id="ob-ve">—</b></div>
+          <div class="ro"><span>ΔV desde la Tierra</span><b id="ob-dv">—</b></div>
+        </div>
+        <div class="status" id="ob-status"></div>
+      </div>
+      <div class="explain">
+        <div class="card">
+          <h3>Órbita circular</h3>
+          <p>Un satélite está en órbita cuando "cae" alrededor de la Tierra sin tocarla nunca: la gravedad da justo la fuerza centrípeta.</p>
+          <div class="formula" style="margin-top:6px">G·M·m / r² = m·v² / r   →   v = √(μ / r)</div>
+          <div class="formula" style="margin-top:6px">T = 2π·√(r³ / μ)     v<sub>escape</sub> = √(2μ / r)</div>
+          <p style="margin-top:6px">con μ = G·M<sub>Tierra</sub> = 398.600 km³/s² y r = 6.371 km + altura. Cuanto más alta la órbita, <b>más lenta</b> la velocidad y <b>más largo</b> el período.</p>
+        </div>
+        <div class="card">
+          <h3>Geoestacionaria</h3>
+          <p>A 35.786 km el período es igual a un día sidéreo (23 h 56 min): el satélite gira junto con la Tierra y desde el suelo se ve quieto. Es la órbita del GOES-S de la pestaña anterior (22.300 millas).</p>
+        </div>
+        <div class="card">
+          <h3>Cómo se llega más alto</h3>
+          <p>Desde una órbita baja de 200 km se hace una transferencia de Hohmann: un encendido alarga la órbita hasta la altura deseada y otro, al llegar arriba, la circulariza. El ΔV de la tabla suma los 9,4 km/s para llegar a 200 km más esos dos encendidos (sin cambio de plano).</p>
+        </div>
+        <div class="exam">
+          <h3>Para el parcial</h3>
+          <ul><li>v = √(μ/r) y T = 2π√(r³/μ); r se mide desde el centro de la Tierra.</li><li>Órbita baja ≈ 7,8 km/s y ≈ 90 min. GEO ≈ 3,07 km/s y 24 h.</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer class="wrap"><p>Basado en el PPT "Repaso 2do Parcial — Materiales + Proceso de Fabricación" (CAE I, Rev. 0 2025). Los modelos son simplificados con valores típicos de bibliografía; sirven para entender el comportamiento, no para dimensionar.</p></footer>
+<script src="js/nucleo.js"></script>
+<script src="js/hipersustentadores.js"></script>
+<script src="js/spoilers.js"></script>
+<script src="js/comandos.js"></script>
+<script src="js/compensadores.js"></script>
+<script src="js/empenaje.js"></script>
+<script src="js/estructura-ala.js"></script>
+<script src="js/materiales.js"></script>
+<script src="js/proteccion-termica.js"></script>
+<script src="js/fabricacion.js"></script>
+<script src="js/cohetes.js"></script>
+<script src="js/inicio.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+# Archivos que crea Windows o macOS y no hace falta subir
+Thumbs.db
+desktop.ini
+.DS_Store
