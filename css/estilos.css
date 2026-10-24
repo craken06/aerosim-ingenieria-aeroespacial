@@ -29,6 +29,10 @@ html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
 .wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.support{background:var(--accent-soft);border-bottom:1px solid var(--line)}
+.support .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px;padding-block:8px}
+.support p{margin:0;font-size:13px;color:var(--ink)}
+.support .btn{text-decoration:none;display:inline-block;white-space:nowrap}
 header.top{background:var(--surface);border-bottom:1px solid var(--line)}
 header.top .wrap{padding-block:18px 14px;display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 18px;justify-content:space-between}
 h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,36px);line-height:1;margin:0;letter-spacing:.01em;text-wrap:balance}

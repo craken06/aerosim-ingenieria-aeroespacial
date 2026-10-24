@@ -103,3 +103,9 @@ Cada módulo de `js/` se registra con `register(id, { init, frame })` y el núcl
 ## Autor
 
 Hecho por [**@craken06**](https://github.com/craken06) para estudiar Ingeniería Aeroespacial en la UTN.
+
+## Apoyar el proyecto
+
+Es gratis y siempre lo va a ser. Si te sirvió y querés agradecer el trabajo que llevó, podés dejar un aporte voluntario:
+
+[☕ Invitame un café](https://link.mercadopago.com.ar/aerosim)
